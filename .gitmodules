@@ -1,0 +1,3 @@
+[submodule "devostorage_web"]
+	path = devostorage_web
+	url = https://github.com/DevoTech-Interprise/devostorage_web.git
