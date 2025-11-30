@@ -122,11 +122,3 @@ classDiagram
 - README do Front-end: `devostorage_web/README.md`
 
 ---
-
-## Próximos passos que posso executar para você
-
-- Gerar imagens SVG/PNG dos diagramas e adicioná-las em `/docs/assets/`.
-- Criar um script de `bootstrap` para iniciar API + Web (PowerShell/Bash) em um só comando.
-- Preparar um PR com o README principal e pequenas alterações de documentação.
-
-Diga qual desses próximos passos prefere que eu execute.
