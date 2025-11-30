@@ -1,0 +1,93 @@
+@startuml
+!theme plain
+left to right direction
+
+actor "Funcionário" as Emp
+actor "Administrador" as Admin
+
+' Herança: Admin é um Funcionário com mais poderes
+Admin -|> Emp
+
+package "DevOS Storage API" {
+
+    ' --- Autenticação ---
+    package "Acesso" {
+        usecase "Realizar Login" as UC_Login
+        usecase "Visualizar Próprio Perfil" as UC_Me
+    }
+
+    ' --- Gestão de Produtos ---
+    package "Catálogo" {
+        usecase "Listar Produtos" as UC_ListProd
+        usecase "Cadastrar Produto" as UC_CreateProd
+        usecase "Editar Produto" as UC_EditProd
+        usecase "Excluir Produto" as UC_DelProd
+    }
+
+    ' --- Movimentação de Estoque ---
+    package "Estoque" {
+        usecase "Consultar Estoque" as UC_ViewStock
+        usecase "Registrar Entrada" as UC_Entry
+        usecase "Registrar Saída" as UC_Exit
+        usecase "Visualizar Histórico" as UC_History
+        
+        note right of UC_Exit
+            Valida quantidade
+            disponível
+        end note
+    }
+
+    ' --- Relatórios e Arquivos ---
+    package "Relatórios" {
+        usecase "Gerar Relatório de Estoque" as UC_RepStock
+        usecase "Gerar Relatório de Movimentações" as UC_RepMov
+        usecase "Listar Arquivos Gerados" as UC_ListFiles
+        usecase "Baixar Arquivo (Download)" as UC_Download
+
+        ' Extensões de formatos
+        usecase "Exportar PDF" as UC_PDF
+        usecase "Exportar Excel" as UC_Excel
+
+        UC_RepStock <|-- UC_PDF
+        UC_RepStock <|-- UC_Excel
+        UC_RepMov <|-- UC_PDF
+        UC_RepMov <|-- UC_Excel
+    }
+
+    ' --- Gestão Administrativa ---
+    package "admin" {
+        usecase "Gerenciar Usuários" as UC_ManageUsers
+        note right of UC_ManageUsers
+            CRUD completo
+            (Criar, Listar, Editar, Excluir)
+        end note
+    }
+}
+
+' --- Relacionamentos ---
+
+' Todos precisam estar logados (exceto o login em si)
+UC_Me .> UC_Login : <<include>>
+UC_CreateProd .> UC_Login : <<include>>
+UC_Entry .> UC_Login : <<include>>
+
+' Funcionário conecta aos casos de uso
+Emp --> UC_Login
+Emp --> UC_Me
+Emp --> UC_ListProd
+Emp --> UC_CreateProd
+Emp --> UC_EditProd
+Emp --> UC_DelProd
+Emp --> UC_ViewStock
+Emp --> UC_Entry
+Emp --> UC_Exit
+Emp --> UC_History
+Emp --> UC_RepStock
+Emp --> UC_RepMov
+Emp --> UC_ListFiles
+Emp --> UC_Download
+
+' Admin conecta aos casos exclusivos
+Admin --> UC_ManageUsers
+
+@enduml

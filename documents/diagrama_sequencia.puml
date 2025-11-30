@@ -1,0 +1,61 @@
+@startuml
+!theme plain
+autonumber
+
+actor "Cliente" as User
+participant "MovimentacaoController" as Ctrl
+participant "AuthUser (Service)" as AuthService
+participant "ProdutoModel" as ProdModel
+participant "Database" as DB
+participant "MovimentacaoModel" as MovModel
+
+User -> Ctrl : POST /api/movimentacoes/entrada\n{ produto_id: 1, quantidade: 50 }
+activate Ctrl
+
+    ' 1. Autenticação e Validação
+    Ctrl -> AuthService : id()
+    activate AuthService
+    AuthService --> Ctrl : usuario_id (ex: 10)
+    deactivate AuthService
+
+    ' 2. Buscar Produto
+    Ctrl -> ProdModel : find(1)
+    activate ProdModel
+    ProdModel --> Ctrl : { id: 1, quantidade: 100, ... }
+    deactivate ProdModel
+
+    alt Produto não encontrado
+        Ctrl --> User : 404 Not Found
+    else Produto existe
+        ' 3. Calcular nova quantidade
+        note right of Ctrl : Nova Qtd = 100 + 50 = 150
+
+        ' 4. Iniciar Transação
+        Ctrl -> DB : transStart()
+        activate DB
+        
+        ' 5. Atualizar Produto
+        Ctrl -> ProdModel : update(1, { quantidade: 150 })
+        activate ProdModel
+        ProdModel --> Ctrl : true
+        deactivate ProdModel
+
+        ' 6. Registrar Movimentação
+        Ctrl -> MovModel : insert({ produto_id: 1, tipo: 'entrada', ... })
+        activate MovModel
+        MovModel --> Ctrl : insert_id (ex: 500)
+        deactivate MovModel
+
+        ' 7. Finalizar Transação
+        Ctrl -> DB : transComplete()
+        deactivate DB
+
+        alt Sucesso na Transação
+            Ctrl --> User : 201 Created\n{ mensagem: "Sucesso", estoque_atual: 150 }
+        else Falha
+            Ctrl --> User : 500 Internal Server Error
+        end
+    end
+
+deactivate Ctrl
+@enduml
