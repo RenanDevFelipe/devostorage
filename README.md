@@ -1,4 +1,4 @@
-# DevStorange — Monorepo
+# DevoStorage — Monorepo
 
 > Visão unificada dos subprojetos **devostorage_api** (API) e **devostorage_web** (front-end).
 
