@@ -103,11 +103,39 @@ Descreve as funcionalidades acessíveis por Funcionários e Administradores.
 
 ![Diagrama de Casos de Uso](/documents/diagrama_casos_uso.png)
 
-### Diagrama de Classes (API)
+### Diagrama de Classes (nível alto — API e Front)
 
 Mostra a estrutura do backend, destacando a separação entre Controllers, Services e Models, e como o ReportGenerator orquestra os dados.
 
-![Diagrama de Classes](/documents/diagrama_classes.png)
+```mermaid
+classDiagram
+  %% API classes
+  class UserController{+login()+me()+create()+update()+delete()}
+  class ProdutoController{+index()+show()+store()+update()+delete()}
+  class MovimentacaoController{+entrada()+saida()+index()}
+  class RelatorioController{+estoquePDF()+estoqueExcel()+movimentacoesPDF()}
+  class ReportGenerator{+gerarPDF()+gerarExcel()+salvarArquivo()}
+  class UserModel
+  class ProdutoModel
+  class MovimentacaoModel
+
+  UserController --> UserModel
+  ProdutoController --> ProdutoModel
+  MovimentacaoController --> MovimentacaoModel
+  RelatorioController --> ReportGenerator
+  ReportGenerator --> ProdutoModel
+  ReportGenerator --> MovimentacaoModel
+
+  %% Front-end classes
+  class AuthContext{+signIn()+signOut()+user}
+  class ApiService{+get()+post()+put()+delete()}
+  class ProdutoService{+list()+get()+create()+update()+delete()}
+  class ProdutoPage{+render()+handleCreate()+handleEdit()}
+
+  ProdutoPage --> ProdutoService
+  ProdutoService --> ApiService
+  AuthContext --> ApiService
+```
 
 ### Diagrama de Sequencia (Movimentação)
 
