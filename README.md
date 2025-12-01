@@ -107,7 +107,7 @@ Descreve as funcionalidades acessíveis por Funcionários e Administradores.
 
 Mostra a estrutura do backend, destacando a separação entre Controllers, Services e Models, e como o ReportGenerator orquestra os dados.
 
-![Diagrama de Classes](/documents/diagrama_classes.png.png)
+![Diagrama de Classes](/documents/diagrama_classes.png)
 
 ### Diagrama de Sequencia (Movimentação)
 
