@@ -4,6 +4,10 @@
 
 ![Monorepo](https://img.shields.io/badge/Monorepo-DevOS_Orange-blue?style=flat-square)
 
+## Contexto
+
+Sistema de controle de estoque white-label com foco em ser versatil.
+
 Este README principal reúne a visão geral, diagramas de caso de uso, classes e sequencia, instruções rápidas de execução e links para os READMEs específicos de cada subprojeto.
 
 ## Índice
