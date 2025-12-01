@@ -1,0 +1,147 @@
+@startuml
+
+!theme plain
+hide empty members
+skinparam packageStyle rectangle
+
+' --- Framework CodeIgniter ---
+package "CodeIgniter" {
+    class "Controller" as CI_Controller
+    class "Model" as CI_Model
+    
+    package "RESTful" {
+        class "ResourceController" as CI_ResourceController
+    }
+}
+
+' --- Aplicação (App) ---
+package "App" {
+
+    ' --- Controllers ---
+    package "Controllers" {
+        class BaseController {
+            #$request
+            #$helpers
+            +initController($request, $response, $logger)
+        }
+
+        class Home {
+            +index() : string
+        }
+
+        class UserController {
+            +login() : Response
+            +me() : Response
+            +index()
+            +show($id)
+            +create()
+            +update($id)
+            +delete($id)
+        }
+
+        class ProdutoController {
+            +index()
+            +show($id)
+            +create()
+            +update($id)
+            +delete($id)
+        }
+
+        class MovimentacaoController {
+            +index()
+            +entrada()
+            +saida()
+            -registrarMovimentacao($tipo)
+        }
+
+        class RelatorioController {
+            #$reportGenerator : ReportGenerator
+            +estoque()
+            +movimentacoes()
+            +estoquePdf()
+            +estoqueExcel()
+            +movimentacoesPdf()
+            +movimentacoesExcel()
+            +movimentacoesProduto($id)
+        }
+
+        class DownloadController {
+            +arquivo($filename)
+            +downloadJson($filename)
+            +listar()
+        }
+    }
+
+    ' --- Services ---
+    package "Services" {
+        class ReportGenerator {
+            +gerarPdfMovimentacoes(...)
+            +gerarExcelMovimentacoes(...)
+            +gerarPdfEstoque()
+            +gerarExcelEstoque()
+        }
+
+        class AuthUser {
+            -user : array
+            +setUser($data)
+            +user()
+            +id()
+        }
+    }
+
+    ' --- Models ---
+    package "Models" {
+        class UserModel {
+            +findByEmail($email)
+            #hashPassword($data)
+        }
+
+        class ProdutoModel {
+            #$validationRules
+        }
+
+        class MovimentacaoModel {
+            +comProduto()
+            +comDetalhes()
+            +porProduto($id)
+            +porPeriodo($inicio, $fim)
+        }
+    }
+}
+
+' --- Relacionamentos de Herança (Framework) ---
+CI_Controller <|-- BaseController
+CI_Controller <|-- DownloadController
+BaseController <|-- Home
+CI_ResourceController <|-- UserController
+CI_ResourceController <|-- ProdutoController
+CI_ResourceController <|-- MovimentacaoController
+CI_ResourceController <|-- RelatorioController
+CI_Model <|-- UserModel
+CI_Model <|-- ProdutoModel
+CI_Model <|-- MovimentacaoModel
+
+' --- Dependências e Associações (App) ---
+
+' Controllers -> Models
+UserController ..> UserModel : usa
+ProdutoController ..> ProdutoModel : usa
+
+' Movimentação -> Lógica de Negócio
+MovimentacaoController ..> MovimentacaoModel : usa
+MovimentacaoController ..> ProdutoModel : atualiza estoque
+MovimentacaoController ..> AuthUser : id usuário logado
+
+' Relatórios -> Serviço Gerador
+RelatorioController --> ReportGenerator : delega
+
+' Gerador -> Acesso a Dados
+ReportGenerator o-- MovimentacaoModel
+ReportGenerator o-- ProdutoModel
+ReportGenerator o-- UserModel
+
+' Associações de Banco de Dados (Lógicas)
+MovimentacaoModel "0..*" --> "1" ProdutoModel : produto_id
+MovimentacaoModel "0..*" --> "1" UserModel : usuario_id
+
+@enduml
