@@ -61,7 +61,6 @@ As seções abaixo usam Mermaid para diagramas.
 
 Descreve as funcionalidades acessíveis por Funcionários e Administradores.
 
-```mermaid
 usecaseDiagram
     actor Emp as "Funcionário"
     actor Admin as "Administrador"
@@ -91,7 +90,7 @@ usecaseDiagram
     Emp --> UC_Download
 
     Admin --> UC_Users
-```
+
 
 ### Diagrama de Classes (API)
 
