@@ -4,14 +4,15 @@
 
 ![Monorepo](https://img.shields.io/badge/Monorepo-DevOS_Orange-blue?style=flat-square)
 
-Este README principal reúne a visão geral, diagramas de caso de uso e classes, instruções rápidas de execução e links para os READMEs específicos de cada subprojeto.
+Este README principal reúne a visão geral, diagramas de caso de uso, classes e sequencia, instruções rápidas de execução e links para os READMEs específicos de cada subprojeto.
 
 ## Índice
 - Visão Geral
 - Como rodar rapidamente
 - Diagramas
-  - Caso de Uso (Mermaid)
-  - Diagrama de Classes (Mermaid)
+  - Diagrama de Casos de Uso
+  - Diagrama de Classes (API)
+  - Diagrama de Sequencia (Movimentacação)
 - Estrutura dos Subprojetos
 - Links úteis
 
@@ -19,12 +20,10 @@ Este README principal reúne a visão geral, diagramas de caso de uso e classes,
 
 ## Visão Geral
 
-O monorepo contém dois subprojetos principais:
+O repositorio contém dois subprojetos principais:
 
 - `devostorage_api/` — API RESTful em PHP (CodeIgniter 4) responsável por autenticação, gerenciamento de produtos, movimentações e geração de relatórios (PDF / Excel).
 - `devostorage_web/` — SPA em React + TypeScript que consome a API e fornece UI para gerenciamento, dashboard e downloads.
-
-Este README centraliza os diagramas de Caso de Uso e de Classes para facilitar entendimento arquitetural do sistema como um todo.
 
 ---
 
@@ -50,12 +49,53 @@ npm run dev
 ```
 
 Observação: configure `VITE_API_URL` no front-end (arquivo `.env` ou `src/services/api.ts`) apontando para o `baseURL` da API.
+---
+
+# 🛠️ Tecnologias Utilizadas
+
+O projeto **DevoStorage** foi desenvolvido utilizando uma arquitetura moderna, separando o Backend (API) do Frontend (SPA). Abaixo estão listadas as principais linguagens, frameworks e bibliotecas empregadas.
+
+## 🔙 Backend (API)
+
+A API reside no diretório `devostorage_api/` e é responsável por toda a regra de negócio, autenticação e acesso a dados.
+
+* **Linguagem**: [PHP 8.1+](https://www.php.net/)
+* **Framework**: [CodeIgniter 4](https://codeigniter.com/) (v4.6.3)
+* **Gerenciador de Dependências**: [Composer](https://getcomposer.org/)
+
+## 🖥️ Frontend (Web)
+
+A interface web reside no diretório `devostorage_web/` e consome a API para fornecer a experiência do usuário.
+
+* **Framework**: [React](https://react.dev/)
+* **Linguagem**: [TypeScript](https://www.typescriptlang.org/)
+* **Build Tool**: [Vite](https://vitejs.dev/)
+* **Tipo de Aplicação**: Single Page Application (SPA)
+
+## 🗄️ Banco de Dados
+
+* **SGBD**: [MySQL](https://www.mysql.com/) (ou MariaDB compatível)
+* **Driver**: MySQLi (Padrão do CodeIgniter)
+
+## 📚 Bibliotecas e Recursos Adicionais
+
+As seguintes bibliotecas foram integradas ao backend para fornecer funcionalidades específicas:
+
+| Biblioteca | Versão | Propósito |
+| :--- | :---: | :--- |
+| **[firebase/php-jwt](https://github.com/firebase/php-jwt)** | `^6.11` | Implementação de autenticação via JSON Web Tokens (JWT) para segurança da API. |
+| **[mpdf/mpdf](https://github.com/mpdf/mpdf)** | `^8.2` | Geração de relatórios de estoque e movimentações em formato **PDF**. |
+| **[phpoffice/phpspreadsheet](https://github.com/PHPOffice/PhpSpreadsheet)** | `^5.3` | Geração e manipulação de planilhas **Excel** (`.xlsx`) para exportação de dados. |
+
+---
+
+> **Nota:** Para instalar as dependências do backend, execute `composer install` dentro da pasta `devostorage_api/`. Para o frontend, utilize `npm install` na pasta `devostorage_web/`.
 
 ---
 
 ## Diagramas
 
-As seções abaixo usam Mermaid para diagramas.
+As seções abaixo mostram os diagramas.
 
 ### Caso de Uso
 
@@ -67,72 +107,13 @@ Descreve as funcionalidades acessíveis por Funcionários e Administradores.
 
 Mostra a estrutura do backend, destacando a separação entre Controllers, Services e Models, e como o ReportGenerator orquestra os dados.
 
-```mermaid
-classDiagram
-    %% Classes Base do CodeIgniter
-    class ResourceController {
-        <<Framework>>
-    }
-    class Model {
-        <<Framework>>
-    }
+![Diagrama de Classes](/documents/diagrama_classes.png.png)
 
-    %% Controllers da Aplicação
-    class UserController {
-        +login()
-        +me()
-        +create()
-    }
-    class MovimentacaoController {
-        +entrada()
-        +saida()
-        -registrarMovimentacao()
-    }
-    class RelatorioController {
-        +estoquePdf()
-        +estoqueExcel()
-        +movimentacoesPdf()
-    }
-    class DownloadController {
-        +arquivo()
-        +listar()
-    }
+### Diagrama de Sequencia (Movimentação)
 
-    %% Herança
-    ResourceController <|-- UserController
-    ResourceController <|-- MovimentacaoController
-    ResourceController <|-- RelatorioController
-    
-    %% Services e Models
-    class ReportGenerator {
-        +gerarPdfEstoque()
-        +gerarExcelMovimentacoes()
-    }
-    class AuthUser {
-        +id()
-        +tipo()
-    }
+Detalha o processo técnico de uma movimentação de entrada, garantindo a integridade do estoque via transação.
 
-    class MovimentacaoModel {
-        +comDetalhes()
-        +porProduto()
-    }
-    class ProdutoModel {
-        +atualizarEstoque()
-    }
-
-    Model <|-- MovimentacaoModel
-    Model <|-- ProdutoModel
-
-    %% Relacionamentos
-    RelatorioController --> ReportGenerator : "Usa para gerar arquivos"
-    ReportGenerator ..> MovimentacaoModel : "Lê dados"
-    ReportGenerator ..> ProdutoModel : "Lê dados"
-    
-    MovimentacaoController ..> MovimentacaoModel : "Grava histórico"
-    MovimentacaoController ..> ProdutoModel : "Atualiza saldo"
-    MovimentacaoController ..> AuthUser : "Verifica usuário"
-```
+![Diagrama de Sequencia](/documents/diagrama_sequencia_movimentacao.png)
 
 ---
 
