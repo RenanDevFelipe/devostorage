@@ -55,57 +55,156 @@ Observação: configure `VITE_API_URL` no front-end (arquivo `.env` ou `src/serv
 
 ## Diagramas
 
-As seções abaixo usam Mermaid para diagramas. GitHub renderiza Mermaid nativamente — abra este arquivo no GitHub para visualizar os diagramas. Se quiser imagens estáticas, posso gerar SVG/PNG e adicioná-las ao repositório.
+As seções abaixo usam Mermaid para diagramas.
 
-### Caso de Uso (visão macro)
+### Caso de Uso
+
+Descreve as funcionalidades acessíveis por Funcionários e Administradores.
 
 ```mermaid
 usecaseDiagram
-  actor Cliente as C
-  rectangle API {
-    C --> (Autenticar)
-    C --> (Gerenciar Produtos)
-    C --> (Registrar Movimentação)
-    C --> (Gerar Relatórios)
-    C --> (Baixar Relatório)
+  actor "Funcionário" as Emp
+  actor "Administrador" as Admin
+  
+  %% Admin herda permissões de Funcionário
+  Admin --|> Emp
+
+  package "DevOS Storage System" {
+    usecase "Autenticar (Login)" as UC_Login
+    usecase "Consultar Perfil" as UC_Me
+    
+    usecase "Gerenciar Produtos (CRUD)" as UC_Prod
+    
+    usecase "Registrar Entrada/Saída" as UC_Mov
+    usecase "Visualizar Histórico" as UC_Hist
+    
+    usecase "Gerar Relatórios (PDF/Excel)" as UC_Rep
+    usecase "Baixar Arquivos" as UC_Download
+    
+    usecase "Gerenciar Usuários" as UC_Users
   }
-  rectangle Frontend {
-    C --> (Acessar Dashboard)
-    C --> (Gerenciar Usuários)
-  }
+
+  %% Relacionamentos
+  Emp --> UC_Login
+  Emp --> UC_Me
+  Emp --> UC_Prod
+  Emp --> UC_Mov
+  Emp --> UC_Hist
+  Emp --> UC_Rep
+  Emp --> UC_Download
+
+  Admin --> UC_Users
 ```
 
-### Diagrama de Classes (nível alto — API e Front)
+### Diagrama de Classes
+
+Mostra a estrutura do backend, destacando a separação entre Controllers, Services e Models, e como o ReportGenerator orquestra os dados.
 
 ```mermaid
 classDiagram
-  %% API classes
-  class UserController{+login()+me()+create()+update()+delete()}
-  class ProdutoController{+index()+show()+store()+update()+delete()}
-  class MovimentacaoController{+entrada()+saida()+index()}
-  class RelatorioController{+estoquePDF()+estoqueExcel()+movimentacoesPDF()}
-  class ReportGenerator{+gerarPDF()+gerarExcel()+salvarArquivo()}
-  class UserModel
-  class ProdutoModel
-  class MovimentacaoModel
+classDiagram
+  %% Classes Base do CodeIgniter
+  class ResourceController {
+    <<Framework>>
+  }
+  class Model {
+    <<Framework>>
+  }
 
-  UserController --> UserModel
-  ProdutoController --> ProdutoModel
-  MovimentacaoController --> MovimentacaoModel
-  RelatorioController --> ReportGenerator
-  ReportGenerator --> ProdutoModel
-  ReportGenerator --> MovimentacaoModel
+  %% Controllers da Aplicação
+  class UserController {
+    +login()
+    +me()
+    +create()
+  }
+  class MovimentacaoController {
+    +entrada()
+    +saida()
+    -registrarMovimentacao()
+  }
+  class RelatorioController {
+    +estoquePdf()
+    +estoqueExcel()
+    +movimentacoesPdf()
+  }
+  class DownloadController {
+    +arquivo()
+    +listar()
+  }
 
-  %% Front-end classes
-  class AuthContext{+signIn()+signOut()+user}
-  class ApiService{+get()+post()+put()+delete()}
-  class ProdutoService{+list()+get()+create()+update()+delete()}
-  class ProdutoPage{+render()+handleCreate()+handleEdit()}
+  %% Herança
+  ResourceController <|-- UserController
+  ResourceController <|-- MovimentacaoController
+  ResourceController <|-- RelatorioController
+  
+  %% Services e Models
+  class ReportGenerator {
+    +gerarPdfEstoque()
+    +gerarExcelMovimentacoes()
+  }
+  class AuthUser {
+    +id()
+    +tipo()
+  }
 
-  ProdutoPage --> ProdutoService
-  ProdutoService --> ApiService
-  AuthContext --> ApiService
+  class MovimentacaoModel {
+    +comDetalhes()
+    +porProduto()
+  }
+  class ProdutoModel {
+    +atualizarEstoque()
+  }
+
+  Model <|-- MovimentacaoModel
+  Model <|-- ProdutoModel
+
+  %% Relacionamentos
+  RelatorioController --> ReportGenerator : "Usa para gerar arquivos"
+  ReportGenerator ..> MovimentacaoModel : "Lê dados"
+  ReportGenerator ..> ProdutoModel : "Lê dados"
+  
+  MovimentacaoController ..> MovimentacaoModel : "Grava histórico"
+  MovimentacaoController ..> ProdutoModel : "Atualiza saldo"
+  MovimentacaoController ..> AuthUser : "Verifica usuário"
 ```
+
+### Diagrama de Sequência: Fluxo de Entrada
+
+sequenceDiagram
+    autonumber
+    actor User as Cliente (Frontend)
+    participant Ctrl as MovimentacaoController
+    participant Auth as AuthUser (Service)
+    participant Prod as ProdutoModel
+    participant DB as Database (Transaction)
+    participant Mov as MovimentacaoModel
+
+    User->>Ctrl: POST /api/movimentacoes/entrada
+    Note right of User: { produto_id: 1, qtd: 50 }
+
+    Ctrl->>Auth: id()
+    Auth-->>Ctrl: Retorna ID do Usuário Logado
+
+    Ctrl->>Prod: find(1)
+    Prod-->>Ctrl: Dados do Produto (Qtd Atual: 100)
+
+    rect rgb(240, 248, 255)
+        Note over Ctrl, Mov: Início da Transação (Atomicidade)
+        Ctrl->>DB: transStart()
+        
+        Ctrl->>Prod: update(1, { quantidade: 150 })
+        Note right of Prod: Soma 100 + 50
+        
+        Ctrl->>Mov: insert({ produto_id: 1, tipo: 'entrada', ... })
+        
+        Ctrl->>DB: transComplete()
+    end
+
+    alt Sucesso
+        Ctrl-->>User: 201 Created (JSON)
+    else Falha
+        Ctrl-->>User: 500 Internal Server Error
+    end
 
 ---
 

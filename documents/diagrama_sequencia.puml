@@ -2,7 +2,7 @@
 !theme plain
 autonumber
 
-actor "Cliente" as User
+actor "Admin" as User
 participant "MovimentacaoController" as Ctrl
 participant "AuthUser (Service)" as AuthService
 participant "ProdutoModel" as ProdModel
