@@ -63,19 +63,23 @@ Descreve as funcionalidades acessíveis por Funcionários e Administradores.
 
 ```mermaid
 usecaseDiagram
-    actor "Funcionário" as Emp
-    actor "Administrador" as Admin
+    actor Emp as "Funcionário"
+    actor Admin as "Administrador"
     Admin --|> Emp
 
     package "DevOS Storage System" {
-        usecase "Autenticar (Login)" as UC_Login
-        usecase "Consultar Perfil" as UC_Me
-        usecase "Gerenciar Produtos (CRUD)" as UC_Prod
-        usecase "Registrar Entrada/Saída" as UC_Mov
-        usecase "Visualizar Histórico" as UC_Hist
-        usecase "Gerar Relatórios (PDF/Excel)" as UC_Rep
-        usecase "Baixar Arquivos" as UC_Download
-        usecase "Gerenciar Usuários" as UC_Users
+        usecase UC_Login as "Autenticar (Login)"
+        usecase UC_Me as "Consultar Perfil"
+        
+        usecase UC_Prod as "Gerenciar Produtos (CRUD)"
+        
+        usecase UC_Mov as "Registrar Entrada/Saída"
+        usecase UC_Hist as "Visualizar Histórico"
+        
+        usecase UC_Rep as "Gerar Relatórios (PDF/Excel)"
+        usecase UC_Download as "Baixar Arquivos"
+        
+        usecase UC_Users as "Gerenciar Usuários"
     }
 
     Emp --> UC_Login
