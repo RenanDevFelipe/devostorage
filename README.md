@@ -61,37 +61,7 @@ As seções abaixo usam Mermaid para diagramas.
 
 Descreve as funcionalidades acessíveis por Funcionários e Administradores.
 
-```mermaid
-
-    actor Emp as "Funcionário"
-    actor Admin as "Administrador"
-    Admin --|> Emp
-
-    package "DevOS Storage System" {
-        usecase UC_Login as "Autenticar (Login)"
-        usecase UC_Me as "Consultar Perfil"
-        
-        usecase UC_Prod as "Gerenciar Produtos (CRUD)"
-        
-        usecase UC_Mov as "Registrar Entrada/Saída"
-        usecase UC_Hist as "Visualizar Histórico"
-        
-        usecase UC_Rep as "Gerar Relatórios (PDF/Excel)"
-        usecase UC_Download as "Baixar Arquivos"
-        
-        usecase UC_Users as "Gerenciar Usuários"
-    }
-
-    Emp --> UC_Login
-    Emp --> UC_Me
-    Emp --> UC_Prod
-    Emp --> UC_Mov
-    Emp --> UC_Hist
-    Emp --> UC_Rep
-    Emp --> UC_Download
-
-    Admin --> UC_Users
-```
+![Diagrama de Casos de Uso](/documents/diagrama_casos_uso.png)
 
 ### Diagrama de Classes (API)
 
